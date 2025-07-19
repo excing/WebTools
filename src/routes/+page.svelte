@@ -1,6 +1,7 @@
 <script lang="ts">
   import { env } from "$env/dynamic/public";
   import { fireapp } from "$lib/firebase";
+    import { apiUrl } from "$lib/utils/dev";
   import { getToken, onMessage } from "firebase/messaging";
   import { onMount } from "svelte";
 
@@ -25,7 +26,7 @@
           console.log("Message received:", payload);
           // Display notification or update UI based on the message
 
-          message = payload.data;
+          message = payload.notification?.title + "\n" + payload.notification?.body;
         });
       } else {
         console.log("Notification permission denied.");
@@ -39,7 +40,7 @@
 
   function handleSend() {
     // 发送消息
-    fetch("/api/message", {
+    fetch(apiUrl("/api/message"), {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -52,10 +53,10 @@
         },
       }),
     })
-      .then((response) => response.json())
-      .then((data) => {
-        console.log("Message sent:", data);
-        message = JSON.stringify(data);
+      .then((response) => response.ok)
+      .then((ok) => {
+        console.log("Message sent:", ok);
+        message = ok ? "Sended" : "Send Failed";
       });
   }
 </script>

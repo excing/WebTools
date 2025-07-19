@@ -8,6 +8,10 @@ const serviceAccount = JSON.parse(
   env.GOOGLE_FIREBASE_ADMIN_SERVICE_ACCOUNT
 );
 
+export const OPTIONS: RequestHandler = async () => {
+  return new Response(null, { status: 204 });
+}
+
 export const POST: RequestHandler = async ({ request, cookies }) => {
   if (!admin.apps || !admin.apps.length) {
     admin.initializeApp({
