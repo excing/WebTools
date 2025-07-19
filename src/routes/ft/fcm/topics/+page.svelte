@@ -33,6 +33,7 @@
         });
         console.log("FCM Device Token:", token);
         firebaseDeviceToken = token;
+        messages = [...messages, "已获得 FCM Device Token: " + token];
 
         onMessage(messagingInstance, (payload) => {
           console.log("Message received:", payload);

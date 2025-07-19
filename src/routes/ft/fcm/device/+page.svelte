@@ -37,9 +37,11 @@
         });
       } else {
         console.log("Notification permission denied.");
+        messages = [...messages, "通知权限被拒绝。"];
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error getting FCM token:", error);
+      messages = [...messages, `错误: ${error.message}`];
     }
   }
 
