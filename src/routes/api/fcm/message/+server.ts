@@ -23,7 +23,7 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
     // console.log("send message to firebase: ", message);
 
     if (dev && env.DOMAIN) {
-      const resp = await fetch(`${env.DOMAIN}/api/message`, {
+      const resp = await fetch(`${env.DOMAIN}/api/fcm/message`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

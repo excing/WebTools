@@ -24,4 +24,5 @@ export const fireapp = () => {
             messaging, analytics
         }
     }
+    throw new Error("YOUR PAGE IS NOT BROWSER");    
 }
