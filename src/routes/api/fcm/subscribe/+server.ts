@@ -1,6 +1,7 @@
 import admin from 'firebase-admin';
 import type { RequestHandler } from './$types';
 import { initializeFirebaseAdmin } from '$lib/firebase-admin';
+import { proxy, proxyRequest } from '$lib/utils/proxy';
 
 // 确保 admin SDK 已经初始化
 // 例如，在你的 `src/lib/firebaseAdmin.ts` 或其他合适的初始化文件中
@@ -14,6 +15,14 @@ export const PUT: RequestHandler = async ({ request }) => {
     if (!token || !topic) {
       return new Response(JSON.stringify({ error: '缺少 token 或 topic' }), { status: 400 });
     }
+
+    const proxyResp = await proxy.json.put("/api/fcm/subscribe", {
+      body: JSON.stringify({
+        token: token,
+        topic: topic,
+      }),
+    })
+    if (proxyResp) return proxyResp;
 
     initializeFirebaseAdmin();
 
@@ -40,6 +49,14 @@ export const DELETE: RequestHandler = async ({ request }) => {
     if (!token || !topic) {
       return new Response(JSON.stringify({ error: '缺少 token 或 topic' }), { status: 400 });
     }
+
+    const proxyResp = await proxy.json.delete("/api/fcm/subscribe", {
+      body: JSON.stringify({
+        token: token,
+        topic: topic,
+      }),
+    })
+    if (proxyResp) return proxyResp;
 
     initializeFirebaseAdmin();
 
