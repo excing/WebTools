@@ -1,7 +1,7 @@
 <script lang="ts">
+  import { browser } from "$app/environment";
   import { env } from "$env/dynamic/public";
   import { fireapp } from "$lib/firebase";
-  import { apiUrl } from "$lib/utils/dev";
   import { getToken, onMessage } from "firebase/messaging";
   import { onMount } from "svelte";
 
@@ -10,15 +10,19 @@
 
   let firebaseDeviceToken = $state("");
 
+  let shouldShowPermissionButton = $state(false);
+
   async function requestPermissionAndGetToken() {
     try {
       const fire = fireapp();
       const permission = await Notification.requestPermission();
       if (fire && permission === "granted") {
+        shouldShowPermissionButton = false;
+
         const token = await getToken(fire.messaging, {
           vapidKey: env.PUBLIC_GOOGLE_FIREBASE_FCM_VAPIDKEY,
         });
-        console.log("FCM Device Token:", token);
+        // console.log("FCM Device Token:", token);
         // Send this token to your server for storing and sending messages
         firebaseDeviceToken = token;
 
@@ -36,8 +40,6 @@
       console.error("Error getting FCM token:", error);
     }
   }
-
-  onMount(() => {});
 
   function handleSend() {
     // 发送消息
@@ -59,11 +61,20 @@
         console.log("Message sent:", ok);
         message = ok ? "Sended" : "Send Failed";
       })
-      .catch(e => {
+      .catch((e) => {
         console.log(e);
         message = e.message;
       });
   }
+
+  onMount(() => {
+    if (browser && typeof Notification !== "undefined") {
+      shouldShowPermissionButton = Notification.permission !== "granted";
+    }
+    if (Notification.permission === "granted") {
+      requestPermissionAndGetToken(); // 已授权，自动请求 token
+    }
+  });
 </script>
 
 <!-- 编写一个简单的聊天界面, 使用 tailcss -->
@@ -77,7 +88,9 @@
       {/if}
     </div>
     <div class="p-4 flex flex-raw item-center space-x-2">
-      <button onclick={requestPermissionAndGetToken}>🔔</button>
+      {#if shouldShowPermissionButton}
+        <button onclick={requestPermissionAndGetToken}>🔔 启用通知</button>
+      {/if}
       <input
         class="border border-gray-300 rounded p-2 w-full"
         type="text"
