@@ -150,7 +150,7 @@
       return;
     }
 
-    fetch("/api/fmc/message", {
+    fetch("/api/fcm/message", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
