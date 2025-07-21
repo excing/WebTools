@@ -2,6 +2,18 @@
   // 根据 tools 绘制 UI 跳转
   const tools = [
     {
+      name: "Auth",
+      description: "Firebase Authentication",
+      href: "/ft/auth",
+      tools: [
+        {
+          name: "Google",
+          description: "Google Authentication",
+          href: "/ft/auth/google",
+        },
+      ],
+    },
+    {
       name: "FCM",
       description: "Firebase Cloud Messaging",
       href: "/ft/fcm",

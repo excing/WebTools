@@ -2,6 +2,7 @@
 import { initializeApp } from "firebase/app";
 import { getAnalytics } from "firebase/analytics";
 import { getMessaging } from "firebase/messaging";
+import { getAuth } from "firebase/auth";
 import { env } from "$env/dynamic/public";
 import { browser } from "$app/environment";
 // TODO: Add SDKs for Firebase products that you want to use
@@ -19,9 +20,10 @@ export const fireapp = () => {
         const app = initializeApp(firebaseConfig);
         const messaging = getMessaging(app);
         const analytics = getAnalytics(app);
+        const auth = getAuth(app);
 
         return {
-            messaging, analytics
+            messaging, analytics, auth
         }
     }
     throw new Error("YOUR PAGE IS NOT BROWSER");    
