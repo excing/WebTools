@@ -30,6 +30,18 @@
         },
       ],
     },
+    {
+      name: "Tools",
+      description: "Local tools",
+      href: "/tools",
+      tools: [
+        {
+          name: "UUID",
+          description: "Generate UUID",
+          href: "/tools/uuid",
+        },
+      ],
+    },
   ];
 </script>
 
