@@ -11,6 +11,9 @@
     type User
   } from "firebase/auth";
   import { onMount } from "svelte";
+  import { trackAuthEvent, trackUserInteraction, trackError } from "$lib/analytics";
+  import SEOHead from "$lib/components/SEOHead.svelte";
+  import { pageSEOData, generateToolStructuredData, siteConfig } from "$lib/seo";
 
   // 状态管理
   let isLoading = $state(false);
@@ -31,6 +34,10 @@
     isLoading = true;
     error = null;
     addMessage("正在启动 Google 登录...");
+
+    // 追踪登录尝试
+    trackAuthEvent('login_attempt', 'google_popup');
+    trackUserInteraction('click', 'login_button', 'google_popup');
 
     try {
       const fire = fireapp();
@@ -59,6 +66,9 @@
         addMessage("已获取 Google Access Token");
       }
 
+      // 追踪登录成功
+      trackAuthEvent('login_success', 'google_popup', true);
+
     } catch (error: any) {
       console.error("登录时出错:", error);
 
@@ -83,6 +93,11 @@
 
       error = errorMessage;
       addMessage(`错误: ${errorMessage}`);
+
+      // 追踪登录失败
+      trackAuthEvent('login_failure', 'google_popup', false);
+      trackError(error.code || error.message, 'google_auth_popup');
+
     } finally {
       isLoading = false;
     }
@@ -125,16 +140,29 @@
     error = null;
     addMessage("正在登出...");
 
+    // 追踪登出尝试
+    trackAuthEvent('logout_attempt', 'google');
+    trackUserInteraction('click', 'logout_button', 'google');
+
     try {
       const fire = fireapp();
       await fire.auth.signOut();
       user = null;
       isLogin = false;
       addMessage("已成功登出");
+
+      // 追踪登出成功
+      trackAuthEvent('logout_success', 'google', true);
+
     } catch (error: any) {
       console.error("登出时出错:", error);
       error = error.message || "登出失败";
       addMessage(`登出错误: ${error}`);
+
+      // 追踪登出失败
+      trackAuthEvent('logout_failure', 'google', false);
+      trackError(error.message, 'google_auth_logout');
+
     } finally {
       isLoading = false;
     }
@@ -159,11 +187,21 @@
       lastSignInTime: user.metadata.lastSignInTime
     };
 
+    // 追踪复制操作
+    trackUserInteraction('copy', 'user_info', 'google_auth');
+
     try {
       await navigator.clipboard.writeText(JSON.stringify(userInfo, null, 2));
       addMessage("用户信息已复制到剪贴板");
+
+      // 追踪复制成功
+      trackUserInteraction('copy_success', 'user_info', 'clipboard');
+
     } catch (error) {
       addMessage("复制失败，请手动复制");
+
+      // 追踪复制失败
+      trackError('clipboard_copy_failed', 'user_info_copy');
     }
   }
 
@@ -202,13 +240,17 @@
       }
     }
   });
+
+  // 生成认证工具的结构化数据
+  const googleAuthStructuredData = generateToolStructuredData(
+    'Google Firebase 认证',
+    '使用 Google Firebase 进行身份认证，支持弹窗登录和重定向登录，安全可靠的Google OAuth认证服务。',
+    `${siteConfig.url}/ft/auth/google`
+  );
 </script>
 
-<!-- 页面标题 -->
-<svelte:head>
-  <title>Google Firebase 认证 - WebTools</title>
-  <meta name="description" content="使用 Google Firebase 进行身份认证" />
-</svelte:head>
+<!-- SEO 元数据 -->
+<SEOHead seo={pageSEOData.googleAuth} structuredData={googleAuthStructuredData} />
 
 <!-- 主要内容区域 -->
 <div class="min-h-screen bg-gray-50 py-8">

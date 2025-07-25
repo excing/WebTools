@@ -4,6 +4,9 @@
   import { fireapp } from "$lib/firebase";
   import { getToken, onMessage } from "firebase/messaging";
   import { onMount } from "svelte";
+  import SEOHead from "$lib/components/SEOHead.svelte";
+  import { pageSEOData, generateToolStructuredData, siteConfig } from "$lib/seo";
+  import { trackToolUsage, trackUserInteraction } from "$lib/analytics";
 
   let messages = $state([
     "欢迎来到 FCM 主题消息！",
@@ -64,6 +67,12 @@
       return;
     }
 
+    // 追踪订阅尝试
+    trackUserInteraction('click', 'subscribe_topic', 'fcm_topics');
+    trackToolUsage('FCM Topics', 'subscribe_attempt', {
+      topic_name: currentTopic
+    });
+
     try {
       // 向后端发送订阅请求
       const response = await fetch("/api/fcm/subscribe", {
@@ -81,6 +90,12 @@
         isSubscribed = true;
         messages = [...messages, `成功向后端请求订阅主题: ${currentTopic}`];
         console.log(`成功请求订阅主题: ${currentTopic}`);
+
+        // 追踪订阅成功
+        trackToolUsage('FCM Topics', 'subscribe_success', {
+          topic_name: currentTopic
+        });
+
       } else {
         const errorData = await response.json();
         isSubscribed = false;
@@ -89,11 +104,23 @@
           `向后端请求订阅主题失败: ${currentTopic} - ${errorData.error}`,
         ];
         console.error(`向后端请求订阅主题失败: ${currentTopic}`, errorData);
+
+        // 追踪订阅失败
+        trackToolUsage('FCM Topics', 'subscribe_failure', {
+          topic_name: currentTopic,
+          error_message: errorData.error
+        });
       }
     } catch (error: any) {
       isSubscribed = false;
       messages = [...messages, `网络或未知错误: ${error.message}`];
       console.error(`网络或未知错误: ${error}`, error);
+
+      // 追踪订阅错误
+      trackToolUsage('FCM Topics', 'subscribe_error', {
+        topic_name: currentTopic,
+        error_message: error.message
+      });
     }
   }
 
@@ -189,8 +216,23 @@
     if (Notification.permission === "granted") {
       requestPermissionAndGetToken();
     }
+
+    // 追踪页面访问
+    trackToolUsage('FCM Topics', 'page_visit', {
+      notification_permission: Notification.permission
+    });
   });
+
+  // 生成FCM主题消息工具的结构化数据
+  const fcmTopicsStructuredData = generateToolStructuredData(
+    'FCM 主题消息推送',
+    'Firebase Cloud Messaging 主题消息推送工具，支持主题订阅和群组消息推送。',
+    `${siteConfig.url}/ft/fcm/topics`
+  );
 </script>
+
+<!-- SEO 元数据 -->
+<SEOHead seo={pageSEOData.fcmTopics} structuredData={fcmTopicsStructuredData} />
 
 <!-- 聊天界面 UI 保持不变 -->
 <div class="flex flex-col h-screen font-sans">

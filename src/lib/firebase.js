@@ -1,6 +1,6 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
-import { getAnalytics } from "firebase/analytics";
+import { getAnalytics, isSupported } from "firebase/analytics";
 import { getMessaging } from "firebase/messaging";
 import { getAuth } from "firebase/auth";
 import { env } from "$env/dynamic/public";
@@ -14,17 +14,43 @@ const firebaseConfig = JSON.parse(
     env.PUBLIC_GOOGLE_FIREBASE_CONFIG
 );
 
+let app;
+let analytics;
+let messaging;
+let auth;
+
 export const fireapp = () => {
     if (browser) {
-        // Initialize Firebase
-        const app = initializeApp(firebaseConfig);
-        const messaging = getMessaging(app);
-        const analytics = getAnalytics(app);
-        const auth = getAuth(app);
+        if (!app) {
+            // Initialize Firebase
+            app = initializeApp(firebaseConfig);
+            auth = getAuth(app);
+
+            // Initialize Messaging
+            messaging = getMessaging(app);
+        }
 
         return {
-            messaging, analytics, auth
+            app,
+            messaging,
+            analytics,
+            auth
         }
     }
-    throw new Error("YOUR PAGE IS NOT BROWSER");    
+    throw new Error("YOUR PAGE IS NOT BROWSER");
+}
+
+// 异步初始化 Analytics
+export const initAnalytics = async () => {
+    if (browser && !analytics && app) {
+        try {
+            if (await isSupported()) {
+                analytics = getAnalytics(app);
+                console.log("Analytics initialized");
+            }
+        } catch (error) {
+            console.error("Failed to initialize Analytics:", error);
+        }
+    }
+    return analytics;
 }

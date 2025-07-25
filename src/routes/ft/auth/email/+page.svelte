@@ -13,6 +13,8 @@
     type ActionCodeSettings
   } from "firebase/auth";
   import { onMount } from "svelte";
+  import SEOHead from "$lib/components/SEOHead.svelte";
+  import { pageSEOData, generateToolStructuredData, siteConfig } from "$lib/seo";
 
   // 状态管理
   let isLoading = $state(false);
@@ -269,13 +271,17 @@
       }
     }
   });
+
+  // 生成邮件认证工具的结构化数据
+  const emailAuthStructuredData = generateToolStructuredData(
+    '电子邮件链接认证',
+    '使用电子邮件链接进行无密码身份认证，安全便捷的邮件验证登录方式。',
+    `${siteConfig.url}/ft/auth/email`
+  );
 </script>
 
-<!-- 页面标题 -->
-<svelte:head>
-  <title>电子邮件链接认证 - WebTools</title>
-  <meta name="description" content="使用电子邮件链接进行无密码身份认证" />
-</svelte:head>
+<!-- SEO 元数据 -->
+<SEOHead seo={pageSEOData.emailAuth} structuredData={emailAuthStructuredData} />
 
 <!-- 主要内容区域 -->
 <div class="min-h-screen bg-gray-50 py-8">

@@ -1,5 +1,10 @@
 <script lang="ts">
   import { onMount } from 'svelte';
+  import { trackToolUsage, trackUserInteraction } from '$lib/analytics';
+  import SEOHead from '$lib/components/SEOHead.svelte';
+  import { pageSEOData, generateToolStructuredData, siteConfig } from '$lib/seo';
+  import { trackFunnelStep, trackConversionGoal } from '$lib/conversionTracking';
+
   let uuid = '';
   let version = 'v4';
   let copied = false;
@@ -18,24 +23,68 @@
       uuid = generateUUIDv4();
     }
     copied = false;
+
+    // 追踪 UUID 生成事件
+    trackToolUsage('UUID Generator', 'generate', {
+      version: version,
+      uuid_length: uuid.length
+    });
+
+    // 追踪转化漏斗和目标
+    trackFunnelStep('tool_usage_funnel', 'tool_interaction', {
+      tool_name: 'UUID Generator',
+      action: 'generate'
+    });
+    trackConversionGoal('uuid_generated', {
+      version: version
+    });
   }
 
   function copy() {
     navigator.clipboard.writeText(uuid);
     copied = true;
     setTimeout(() => copied = false, 1200);
+
+    // 追踪复制事件
+    trackUserInteraction('copy', 'uuid_result', 'clipboard');
+
+    // 追踪转化目标
+    trackFunnelStep('tool_usage_funnel', 'tool_success', {
+      tool_name: 'UUID Generator',
+      action: 'copy'
+    });
+    trackConversionGoal('uuid_copied', {
+      uuid_length: uuid.length
+    });
+    trackToolUsage('UUID Generator', 'copy', {
+      version: version,
+      uuid_value: uuid
+    });
   }
 
   onMount(() => {
     generate();
+    // 追踪页面访问
+    trackToolUsage('UUID Generator', 'page_visit', {
+      initial_version: version
+    });
+
+    // 追踪转化漏斗步骤
+    trackFunnelStep('tool_usage_funnel', 'tool_page_visit', {
+      tool_name: 'UUID Generator'
+    });
   });
+
+  // 生成工具页面的结构化数据
+  const uuidToolStructuredData = generateToolStructuredData(
+    'UUID 在线生成工具',
+    'UUID 在线生成工具，支持 UUID v4，附详细介绍、用途、实现方式与原理说明。免费、快速、安全的UUID生成器。',
+    `${siteConfig.url}/tools/uuid`
+  );
 </script>
 
-<svelte:head>
-  <title>UUID 在线生成工具 | 介绍与实现原理 - WebTools</title>
-  <meta name="description" content="UUID 在线生成工具，支持 UUID v4，附详细介绍、用途、实现方式与原理说明。" />
-  <meta name="keywords" content="UUID, UUID生成, 在线工具, 唯一标识, v4, JavaScript, 实现原理" />
-</svelte:head>
+<!-- SEO 元数据 -->
+<SEOHead seo={pageSEOData.uuidTool} structuredData={uuidToolStructuredData} pathname="/tools/uuid" />
 
 <main class="container">
   <section class="tool-section">
