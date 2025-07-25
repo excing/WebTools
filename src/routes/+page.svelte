@@ -11,6 +11,11 @@
           description: "Google Authentication",
           href: "/ft/auth/google",
         },
+        {
+          name: "Email Link",
+          description: "Email Link Authentication",
+          href: "/ft/auth/email",
+        },
       ],
     },
     {
