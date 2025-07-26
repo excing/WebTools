@@ -5,6 +5,9 @@
 	import { onMount } from "svelte";
 	import { beforeNavigate, afterNavigate } from "$app/navigation";
 	import { userBehaviorTracker } from "$lib/userBehavior";
+	import CookieConsentBanner from "$lib/components/CookieConsentBanner.svelte";
+	import Footer from "$lib/components/Footer.svelte";
+	import { cookieConsentManager } from "$lib/cookieConsent";
 
 	let { children } = $props();
 
@@ -17,6 +20,36 @@
 			await analytics.init();
 		}
 	});
+
+	// 处理cookie同意变更
+	function handleConsentGiven(event: CustomEvent) {
+		const { type, consent } = event.detail;
+		console.log('Cookie consent given:', type, consent);
+
+		// 重新初始化分析系统
+		if (consent?.analytics || type === 'accept-all') {
+			analytics.reinitialize();
+			userBehaviorTracker.enable();
+		} else {
+			analytics.disable();
+			userBehaviorTracker.disable();
+		}
+	}
+
+	// 监听全局同意状态变更
+	if (browser) {
+		window.addEventListener('consentChanged', (event: Event) => {
+			const customEvent = event as CustomEvent;
+			const consentState = customEvent.detail;
+			if (consentState.analytics) {
+				analytics.reinitialize();
+				userBehaviorTracker.enable();
+			} else {
+				analytics.disable();
+				userBehaviorTracker.disable();
+			}
+		});
+	}
 
 	// 监听导航开始
 	beforeNavigate(() => {
@@ -91,3 +124,9 @@
 </svelte:head>
 
 {@render children()}
+
+<!-- 页脚 -->
+<Footer />
+
+<!-- Cookie同意横幅 -->
+<CookieConsentBanner on:consentGiven={handleConsentGiven} />

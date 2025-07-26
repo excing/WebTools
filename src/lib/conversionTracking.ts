@@ -1,6 +1,7 @@
 import { browser } from '$app/environment';
 import { trackEvent } from './analytics';
 import { trackABTestConversion } from './abTesting';
+import { hasConsentForCategory } from './cookieConsent';
 
 // 转化事件类型
 export interface ConversionEvent {
@@ -292,6 +293,12 @@ class ConversionTracker {
    * 追踪转化目标完成
    */
   public trackConversion(goalId: string, metadata?: Record<string, any>) {
+    // 检查是否有营销Cookie的同意（转化追踪属于营销分析）
+    if (!hasConsentForCategory('marketing') && !hasConsentForCategory('analytics')) {
+      console.log(`Conversion tracking skipped: ${goalId} (no consent for marketing/analytics cookies)`);
+      return;
+    }
+
     if (!this.session) return;
 
     const goal = this.goals.get(goalId);

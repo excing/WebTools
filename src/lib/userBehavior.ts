@@ -1,5 +1,6 @@
 import { browser } from '$app/environment';
 import { trackUserInteraction, trackPerformance } from './analytics';
+import { hasConsentForCategory } from './cookieConsent';
 
 // 用户行为追踪类型
 export interface UserSession {
@@ -40,8 +41,11 @@ class UserBehaviorTracker {
 
   constructor() {
     if (browser) {
-      this.initSession();
-      this.setupEventListeners();
+      // 只有在有分析同意的情况下才初始化
+      if (hasConsentForCategory('analytics')) {
+        this.initSession();
+        this.setupEventListeners();
+      }
     }
   }
 
@@ -49,9 +53,14 @@ class UserBehaviorTracker {
    * 初始化用户会话
    */
   private initSession() {
+    // 检查是否有分析同意
+    if (!hasConsentForCategory('analytics')) {
+      return;
+    }
+
     const sessionId = this.generateSessionId();
     const now = Date.now();
-    
+
     this.session = {
       sessionId,
       startTime: now,
@@ -354,6 +363,51 @@ class UserBehaviorTracker {
     this.session = null;
     localStorage.removeItem('userSession');
     localStorage.removeItem('clickHeatmap');
+  }
+
+  /**
+   * 启用用户行为追踪（当用户同意后调用）
+   */
+  public enable() {
+    if (browser && hasConsentForCategory('analytics')) {
+      this.initSession();
+      this.setupEventListeners();
+      console.log('User behavior tracking enabled');
+    }
+  }
+
+  /**
+   * 禁用用户行为追踪（当用户撤回同意后调用）
+   */
+  public disable() {
+    this.clearSession();
+    this.removeEventListeners();
+    console.log('User behavior tracking disabled');
+  }
+
+  /**
+   * 移除事件监听器
+   */
+  private removeEventListeners() {
+    if (!browser) return;
+
+    window.removeEventListener('scroll', this.handleScroll.bind(this));
+    document.removeEventListener('click', this.handleClick.bind(this));
+    document.removeEventListener('keydown', this.handleKeydown.bind(this));
+    document.removeEventListener('mousemove', this.handleMouseMove.bind(this));
+    document.removeEventListener('visibilitychange', this.handleVisibilityChange.bind(this));
+    window.removeEventListener('beforeunload', this.handleBeforeUnload.bind(this));
+    window.removeEventListener('focus', this.handleFocus.bind(this));
+    window.removeEventListener('blur', this.handleBlur.bind(this));
+
+    if (this.idleTimeout) {
+      clearTimeout(this.idleTimeout);
+      this.idleTimeout = null;
+    }
+    if (this.scrollTimeout) {
+      clearTimeout(this.scrollTimeout);
+      this.scrollTimeout = null;
+    }
   }
 }
 

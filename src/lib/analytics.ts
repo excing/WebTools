@@ -1,6 +1,7 @@
 import { browser } from "$app/environment";
 import { fireapp, initAnalytics } from "./firebase.js";
 import { logEvent, type Analytics } from "firebase/analytics";
+import { hasConsentForCategory } from "./cookieConsent";
 
 // Analytics 事件类型定义
 export interface AnalyticsEvent {
@@ -33,6 +34,12 @@ class AnalyticsManager {
    */
   async init(): Promise<void> {
     if (!browser || this.initialized) return;
+
+    // 检查是否有分析Cookie的同意
+    if (!hasConsentForCategory('analytics')) {
+      console.log("Analytics initialization skipped: no consent for analytics cookies");
+      return;
+    }
 
     try {
       // 先初始化 Firebase
@@ -84,6 +91,12 @@ class AnalyticsManager {
    */
   trackEvent(eventName: string, parameters?: Record<string, any>): void {
     if (!browser) return;
+
+    // 检查是否有分析Cookie的同意
+    if (!hasConsentForCategory('analytics')) {
+      console.log(`Analytics event skipped: ${eventName} (no consent for analytics cookies)`);
+      return;
+    }
 
     if (!this.analytics || !this.initialized) {
       // 如果 Analytics 未初始化，将事件加入队列
@@ -213,6 +226,25 @@ class AnalyticsManager {
    */
   isInitialized(): boolean {
     return this.initialized;
+  }
+
+  /**
+   * 重新初始化Analytics（当用户同意后调用）
+   */
+  async reinitialize(): Promise<void> {
+    this.initialized = false;
+    this.analytics = null;
+    await this.init();
+  }
+
+  /**
+   * 禁用Analytics（当用户撤回同意后调用）
+   */
+  disable(): void {
+    this.initialized = false;
+    this.analytics = null;
+    this.eventQueue = [];
+    console.log("Analytics disabled due to consent withdrawal");
   }
 }
 
