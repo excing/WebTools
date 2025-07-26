@@ -1,6 +1,7 @@
 import type { RequestHandler } from '@sveltejs/kit';
 import { initializeFirebaseAdmin } from '$lib/firebase-admin';
 import admin from 'firebase-admin';
+import { proxy } from '$lib/utils/proxy';
 
 // 初始化 Firebase Admin
 initializeFirebaseAdmin();
@@ -9,7 +10,7 @@ initializeFirebaseAdmin();
  * 批量操作 API
  * POST /api/firestore/batch
  */
-export const POST: RequestHandler = async ({ request }) => {
+export const POST: RequestHandler = async ({ request, url }) => {
   try {
     const { operations } = await request.json();
 
@@ -37,7 +38,11 @@ export const POST: RequestHandler = async ({ request }) => {
       });
     }
 
-    // 在开发环境中直接处理请求
+    // 在开发环境中使用代理请求
+    const proxyResp = await proxy.json.post(url.pathname + url.search, {
+      body: JSON.stringify({ operations })
+    });
+    if (proxyResp) return proxyResp;
 
     const db = admin.firestore();
     const batch = db.batch();
@@ -210,7 +215,7 @@ export const POST: RequestHandler = async ({ request }) => {
  * 批量导入 API
  * PUT /api/firestore/batch
  */
-export const PUT: RequestHandler = async ({ request }) => {
+export const PUT: RequestHandler = async ({ request, url }) => {
   try {
     const { collection, documents, batchSize = 100 } = await request.json();
 
@@ -226,11 +231,15 @@ export const PUT: RequestHandler = async ({ request }) => {
       });
     }
 
-    // 在开发环境中直接处理请求
+    // 在开发环境中使用代理请求
+    const proxyResp = await proxy.json.put(url.pathname + url.search, {
+      body: JSON.stringify({ collection, documents, batchSize })
+    });
+    if (proxyResp) return proxyResp;
 
     const db = admin.firestore();
     const collectionRef = db.collection(collection);
-    
+
     let totalImported = 0;
     const errors: any[] = [];
 
@@ -242,7 +251,7 @@ export const PUT: RequestHandler = async ({ request }) => {
       for (const doc of batchDocuments) {
         try {
           const { id, data } = doc;
-          
+
           if (!data) {
             errors.push({
               index: i + batchDocuments.indexOf(doc),

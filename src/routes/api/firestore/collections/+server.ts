@@ -2,7 +2,6 @@ import type { RequestHandler } from '@sveltejs/kit';
 import { initializeFirebaseAdmin } from '$lib/firebase-admin';
 import admin from 'firebase-admin';
 import { proxy } from '$lib/utils/proxy';
-import { dev } from '$app/environment';
 
 // 初始化 Firebase Admin
 initializeFirebaseAdmin();
@@ -11,10 +10,10 @@ initializeFirebaseAdmin();
  * 获取所有集合列表
  * GET /api/firestore/collections
  */
-export const GET: RequestHandler = async () => {
+export const GET: RequestHandler = async ({ url }) => {
   try {
-    // 代理请求处理（仅在生产环境）
-    const proxyResp = await proxy.json.get("/api/firestore/collections");
+    // 在开发环境中使用代理请求
+    const proxyResp = await proxy.json.get(url.pathname + url.search);
     if (proxyResp) return proxyResp;
 
     const db = admin.firestore();
@@ -54,7 +53,7 @@ export const GET: RequestHandler = async () => {
  * 创建新集合（通过添加第一个文档）
  * POST /api/firestore/collections
  */
-export const POST: RequestHandler = async ({ request }) => {
+export const POST: RequestHandler = async ({ request, url }) => {
   try {
     const { collectionName, documentData, documentId } = await request.json();
 
@@ -70,8 +69,8 @@ export const POST: RequestHandler = async ({ request }) => {
       });
     }
 
-    // 代理请求处理（仅在生产环境）
-    const proxyResp = await proxy.json.post("/api/firestore/collections", {
+    // 在开发环境中使用代理请求
+    const proxyResp = await proxy.json.post(url.pathname + url.search, {
       body: JSON.stringify({ collectionName, documentData, documentId })
     });
     if (proxyResp) return proxyResp;
@@ -127,7 +126,7 @@ export const POST: RequestHandler = async ({ request }) => {
  * 删除集合（删除集合中的所有文档）
  * DELETE /api/firestore/collections
  */
-export const DELETE: RequestHandler = async ({ request }) => {
+export const DELETE: RequestHandler = async ({ request, url }) => {
   try {
     const { collectionName, batchSize = 100 } = await request.json();
 
@@ -143,8 +142,8 @@ export const DELETE: RequestHandler = async ({ request }) => {
       });
     }
 
-    // 代理请求处理（仅在生产环境）
-    const proxyResp = await proxy.json.delete("/api/firestore/collections", {
+    // 在开发环境中使用代理请求
+    const proxyResp = await proxy.json.delete(url.pathname + url.search, {
       body: JSON.stringify({ collectionName, batchSize })
     });
     if (proxyResp) return proxyResp;

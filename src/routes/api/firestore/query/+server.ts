@@ -1,6 +1,7 @@
 import type { RequestHandler } from '@sveltejs/kit';
 import { initializeFirebaseAdmin } from '$lib/firebase-admin';
 import admin from 'firebase-admin';
+import { proxy } from '$lib/utils/proxy';
 
 // 初始化 Firebase Admin
 initializeFirebaseAdmin();
@@ -9,14 +10,14 @@ initializeFirebaseAdmin();
  * 复杂查询 API
  * POST /api/firestore/query
  */
-export const POST: RequestHandler = async ({ request }) => {
+export const POST: RequestHandler = async ({ request, url }) => {
   try {
     const queryConfig = await request.json();
-    const { 
-      collection, 
-      where = [], 
-      orderBy = [], 
-      limit = 10, 
+    const {
+      collection,
+      where = [],
+      orderBy = [],
+      limit = 10,
       startAfter,
       select = []
     } = queryConfig;
@@ -33,7 +34,11 @@ export const POST: RequestHandler = async ({ request }) => {
       });
     }
 
-    // 在开发环境中直接处理请求
+    // 在开发环境中使用代理请求
+    const proxyResp = await proxy.json.post(url.pathname + url.search, {
+      body: JSON.stringify(queryConfig)
+    });
+    if (proxyResp) return proxyResp;
 
     const db = admin.firestore();
     let query: admin.firestore.Query = db.collection(collection);
@@ -138,7 +143,9 @@ export const GET: RequestHandler = async ({ url }) => {
       });
     }
 
-    // 在开发环境中直接处理请求
+    // 在开发环境中使用代理请求
+    const proxyResp = await proxy.json.get(url.pathname + url.search);
+    if (proxyResp) return proxyResp;
 
     const db = admin.firestore();
     const collectionRef = db.collection(collection);
@@ -159,7 +166,7 @@ export const GET: RequestHandler = async ({ url }) => {
         // 获取集合统计信息
         const snapshot = await collectionRef.get();
         const docs = snapshot.docs;
-        
+
         result = {
           operation: 'stats',
           collection,

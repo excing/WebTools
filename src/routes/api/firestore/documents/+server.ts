@@ -2,7 +2,6 @@ import type { RequestHandler } from '@sveltejs/kit';
 import { initializeFirebaseAdmin } from '$lib/firebase-admin';
 import admin from 'firebase-admin';
 import { proxy } from '$lib/utils/proxy';
-import { dev } from '$app/environment';
 
 // 初始化 Firebase Admin
 initializeFirebaseAdmin();
@@ -32,8 +31,8 @@ export const GET: RequestHandler = async ({ url }) => {
       });
     }
 
-    // 代理请求处理（仅在生产环境）
-    const proxyResp = await proxy.json.get("/api/firestore/documents");
+    // 在开发环境中使用代理请求
+    const proxyResp = await proxy.json.get(url.pathname + url.search);
     if (proxyResp) return proxyResp;
 
     const db = admin.firestore();
@@ -125,7 +124,7 @@ export const GET: RequestHandler = async ({ url }) => {
  * 创建或更新文档
  * POST /api/firestore/documents
  */
-export const POST: RequestHandler = async ({ request }) => {
+export const POST: RequestHandler = async ({ request, url }) => {
   try {
     const { collection, documentId, data, merge = false } = await request.json();
 
@@ -141,8 +140,8 @@ export const POST: RequestHandler = async ({ request }) => {
       });
     }
 
-    // 代理请求处理（仅在生产环境）
-    const proxyResp = await proxy.json.post("/api/firestore/documents", {
+    // 在开发环境中使用代理请求
+    const proxyResp = await proxy.json.post(url.pathname + url.search, {
       body: JSON.stringify({ collection, documentId, data, merge })
     });
     if (proxyResp) return proxyResp;
@@ -215,7 +214,7 @@ export const POST: RequestHandler = async ({ request }) => {
  * 更新文档
  * PUT /api/firestore/documents
  */
-export const PUT: RequestHandler = async ({ request }) => {
+export const PUT: RequestHandler = async ({ request, url }) => {
   try {
     const { collection, documentId, data, merge = true } = await request.json();
 
@@ -231,8 +230,8 @@ export const PUT: RequestHandler = async ({ request }) => {
       });
     }
 
-    // 代理请求处理（仅在生产环境）
-    const proxyResp = await proxy.json.put("/api/firestore/documents", {
+    // 在开发环境中使用代理请求
+    const proxyResp = await proxy.json.put(url.pathname + url.search, {
       body: JSON.stringify({ collection, documentId, data, merge })
     });
     if (proxyResp) return proxyResp;
@@ -298,7 +297,7 @@ export const PUT: RequestHandler = async ({ request }) => {
  * 删除文档
  * DELETE /api/firestore/documents
  */
-export const DELETE: RequestHandler = async ({ request }) => {
+export const DELETE: RequestHandler = async ({ request, url }) => {
   try {
     const { collection, documentId } = await request.json();
 
@@ -314,8 +313,8 @@ export const DELETE: RequestHandler = async ({ request }) => {
       });
     }
 
-    // 代理请求处理（仅在生产环境）
-    const proxyResp = await proxy.json.delete("/api/firestore/documents", {
+    // 在开发环境中使用代理请求
+    const proxyResp = await proxy.json.delete(url.pathname + url.search, {
       body: JSON.stringify({ collection, documentId })
     });
     if (proxyResp) return proxyResp;
