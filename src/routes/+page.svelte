@@ -45,6 +45,19 @@
       ],
     },
     {
+      name: "Firestore",
+      description: "Cloud Firestore Database",
+      href: "/ft/firestore",
+      category: "firebase",
+      tools: [
+        {
+          name: "Data Management",
+          description: "Firestore Data Management",
+          href: "/ft/firestore",
+        },
+      ],
+    },
+    {
       name: "Tools",
       description: "Local tools",
       href: "/tools",
