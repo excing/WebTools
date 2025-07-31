@@ -3,7 +3,7 @@
   import SEOHead from '$lib/components/SEOHead.svelte';
   import { pageSEOData, generateStructuredData, siteConfig } from '$lib/seo';
   import { getABTestConfig } from '$lib/abTesting';
-  import { trackFunnelStep, trackConversionGoal } from '$lib/conversionTracking';
+  import { trackFunnelStep } from '$lib/conversionTracking';
   import { onMount } from 'svelte';
 
   // 根据 tools 绘制 UI 跳转
@@ -67,6 +67,11 @@
           name: "UUID",
           description: "Generate UUID",
           href: "/tools/uuid",
+        },
+        {
+          name: "JavaScript 执行器",
+          description: "在线 JavaScript 代码执行器",
+          href: "/tools/js-executor",
         },
       ],
     },

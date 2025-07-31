@@ -230,4 +230,10 @@ export const pageSEOData = {
     description: 'Firebase Cloud Messaging 主题消息推送工具，支持主题订阅和群组消息推送。',
     keywords: 'FCM主题, Firebase消息, 主题订阅, 群组推送, 云消息, 批量通知',
   },
+
+  jsExecutor: {
+    title: 'JavaScript 在线执行器',
+    description: 'JavaScript 在线代码执行器，支持实时运行 JavaScript 代码，查看执行结果和控制台输出。安全、快速的在线 JS 代码测试工具。',
+    keywords: 'JavaScript, 在线执行器, JS代码, 代码测试, 在线编程, JavaScript运行, 代码调试, 前端工具, 算法练习, 代码学习',
+  },
 };
