@@ -73,6 +73,11 @@
           description: "在线 JavaScript 代码执行器",
           href: "/tools/js-executor",
         },
+        {
+          name: "Range 操作工具",
+          description: "DOM Range 对象操作和学习工具",
+          href: "/tools/range",
+        },
       ],
     },
   ];

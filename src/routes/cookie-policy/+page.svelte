@@ -209,9 +209,9 @@
         </p>
         <div class="bg-gray-50 p-4 rounded-lg">
           <p class="text-gray-600">
-            <strong>邮箱：</strong> privacy@webtools.example.com<br>
+            <strong>邮箱：</strong> privacy@tools.blendiv.com<br>
             <strong>地址：</strong> [您的公司地址]<br>
-            <strong>数据保护官：</strong> dpo@webtools.example.com
+            <strong>数据保护官：</strong> dpo@tools.blendiv.com
           </p>
         </div>
       </div>

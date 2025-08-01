@@ -29,7 +29,7 @@ export const defaultSEO: SEOData = {
 // 站点基础信息
 export const siteConfig = {
   name: 'WebTools',
-  url: 'https://webtools.example.com',
+  url: 'https://tools.blendiv.com',
   author: 'WebTools Team',
   twitter: '@webtools',
   logo: '/logo.png',
@@ -235,5 +235,11 @@ export const pageSEOData = {
     title: 'JavaScript 在线执行器',
     description: 'JavaScript 在线代码执行器，支持实时运行 JavaScript 代码，查看执行结果和控制台输出。安全、快速的在线 JS 代码测试工具。',
     keywords: 'JavaScript, 在线执行器, JS代码, 代码测试, 在线编程, JavaScript运行, 代码调试, 前端工具, 算法练习, 代码学习',
+  },
+
+  rangeTool: {
+    title: 'Range 对象操作工具',
+    description: 'Range 对象在线操作工具，支持文本选择、Range 创建、文档片段操作等功能。学习和测试 DOM Range API 的专业工具。',
+    keywords: 'Range, DOM Range, 文本选择, 文档片段, Range API, DOM操作, 前端开发, JavaScript Range, 选择器工具, 文本处理',
   },
 };

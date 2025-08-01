@@ -113,10 +113,10 @@
 			"@type": "WebSite",
 			"name": "WebTools",
 			"description": "专业的在线工具集合，包含Firebase认证、消息推送、UUID生成等实用工具",
-			"url": "https://webtools.example.com",
+			"url": "https://tools.blendiv.com",
 			"potentialAction": {
 				"@type": "SearchAction",
-				"target": "https://webtools.example.com/search?q={search_term_string}",
+				"target": "https://tools.blendiv.com/search?q={search_term_string}",
 				"query-input": "required name=search_term_string"
 			}
 		}

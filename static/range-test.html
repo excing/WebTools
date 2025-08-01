@@ -1,0 +1,219 @@
+<!-- 这个文件应该移动到 static 目录 -->
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Range 工具测试页面</title>
+    <style>
+        body {
+            font-family: system-ui, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem;
+            line-height: 1.6;
+        }
+        .test-area {
+            background: #f9fafb;
+            border: 2px solid #e5e7eb;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin: 1rem 0;
+            min-height: 100px;
+        }
+        .button {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 0.25rem;
+            margin: 0.25rem;
+            cursor: pointer;
+        }
+        .button:hover {
+            background: #2563eb;
+        }
+        .result {
+            background: #eff6ff;
+            border: 1px solid #bfdbfe;
+            border-radius: 0.25rem;
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+        .highlight {
+            background: yellow;
+            padding: 2px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Range 工具功能测试</h1>
+    
+    <div class="test-area" id="testArea" contenteditable="true">
+        这是一段测试文本，用于验证 Range 对象的各种功能。
+        您可以选择这段文字中的任意部分，然后点击下面的按钮来测试不同的 Range 操作。
+        Range 对象是 DOM 中非常强大的工具，可以用于文本选择、内容操作等多种场景。
+    </div>
+
+    <div>
+        <button class="button" onclick="getCurrentRange()">获取当前选择</button>
+        <button class="button" onclick="createCustomRange()">创建自定义 Range</button>
+        <button class="button" onclick="extractContent()">提取内容</button>
+        <button class="button" onclick="cloneContent()">克隆内容</button>
+        <button class="button" onclick="deleteContent()">删除内容</button>
+        <button class="button" onclick="insertContent()">插入内容</button>
+        <button class="button" onclick="highlightText()">高亮文本</button>
+        <button class="button" onclick="resetText()">重置文本</button>
+    </div>
+
+    <div id="result" class="result" style="display: none;">
+        <h3>操作结果</h3>
+        <div id="resultContent"></div>
+    </div>
+
+    <script>
+        let currentRange = null;
+        const originalText = `这是一段测试文本，用于验证 Range 对象的各种功能。
+您可以选择这段文字中的任意部分，然后点击下面的按钮来测试不同的 Range 操作。
+Range 对象是 DOM 中非常强大的工具，可以用于文本选择、内容操作等多种场景。`;
+
+        function showResult(content) {
+            const resultDiv = document.getElementById('result');
+            const resultContent = document.getElementById('resultContent');
+            resultContent.innerHTML = content;
+            resultDiv.style.display = 'block';
+        }
+
+        function getCurrentRange() {
+            const selection = window.getSelection();
+            if (selection && selection.rangeCount > 0) {
+                currentRange = selection.getRangeAt(0);
+                const info = `
+                    <strong>Range 信息:</strong><br>
+                    - 是否折叠: ${currentRange.collapsed ? '是' : '否'}<br>
+                    - 起始偏移: ${currentRange.startOffset}<br>
+                    - 结束偏移: ${currentRange.endOffset}<br>
+                    - 选中文本: "${currentRange.toString()}"<br>
+                    - 文本长度: ${currentRange.toString().length} 字符
+                `;
+                showResult(info);
+            } else {
+                showResult('没有选择任何内容');
+            }
+        }
+
+        function createCustomRange() {
+            const testArea = document.getElementById('testArea');
+            const range = document.createRange();
+            const textNode = testArea.firstChild;
+            
+            if (textNode) {
+                // 选择前20个字符
+                range.setStart(textNode, 0);
+                range.setEnd(textNode, Math.min(20, textNode.textContent.length));
+                
+                // 应用选择
+                const selection = window.getSelection();
+                selection.removeAllRanges();
+                selection.addRange(range);
+                
+                currentRange = range;
+                showResult(`已创建自定义 Range，选择了前20个字符: "${range.toString()}"`);
+            }
+        }
+
+        function extractContent() {
+            if (!currentRange) {
+                showResult('请先选择文本');
+                return;
+            }
+            
+            const content = currentRange.toString();
+            showResult(`提取的内容: "${content}"`);
+        }
+
+        function cloneContent() {
+            if (!currentRange) {
+                showResult('请先选择文本');
+                return;
+            }
+            
+            const clonedFragment = currentRange.cloneContents();
+            const tempDiv = document.createElement('div');
+            tempDiv.appendChild(clonedFragment);
+            
+            showResult(`克隆的内容 (HTML): ${tempDiv.innerHTML}`);
+        }
+
+        function deleteContent() {
+            if (!currentRange) {
+                showResult('请先选择文本');
+                return;
+            }
+            
+            if (currentRange.collapsed) {
+                showResult('Range 已折叠，没有内容可删除');
+                return;
+            }
+            
+            const deletedText = currentRange.toString();
+            currentRange.deleteContents();
+            showResult(`已删除内容: "${deletedText}"`);
+        }
+
+        function insertContent() {
+            if (!currentRange) {
+                showResult('请先选择文本');
+                return;
+            }
+            
+            const textToInsert = '[插入的文本]';
+            const textNode = document.createTextNode(textToInsert);
+            
+            currentRange.deleteContents();
+            currentRange.insertNode(textNode);
+            
+            showResult(`已插入文本: "${textToInsert}"`);
+        }
+
+        function highlightText() {
+            if (!currentRange) {
+                showResult('请先选择文本');
+                return;
+            }
+            
+            if (currentRange.collapsed) {
+                showResult('请选择一些文本进行高亮');
+                return;
+            }
+            
+            try {
+                const span = document.createElement('span');
+                span.className = 'highlight';
+                currentRange.surroundContents(span);
+                showResult('已高亮选中的文本');
+            } catch (error) {
+                showResult('高亮失败: ' + error.message);
+            }
+        }
+
+        function resetText() {
+            const testArea = document.getElementById('testArea');
+            testArea.textContent = originalText;
+            currentRange = null;
+            showResult('已重置文本内容');
+        }
+
+        // 监听文本选择变化
+        document.addEventListener('selectionchange', function() {
+            const selection = window.getSelection();
+            if (selection && selection.rangeCount > 0) {
+                const range = selection.getRangeAt(0);
+                if (!range.collapsed) {
+                    console.log('选择了文本:', range.toString());
+                }
+            }
+        });
+    </script>
+</body>
+</html>
