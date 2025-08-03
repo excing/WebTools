@@ -78,6 +78,11 @@
           description: "DOM Range 对象操作和学习工具",
           href: "/tools/range",
         },
+        {
+          name: "Indexed DB",
+          description: "IndexedDB 测试工具",
+          href: "/tools/indexeddb",
+        },
       ],
     },
   ];
